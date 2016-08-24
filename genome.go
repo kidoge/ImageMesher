@@ -23,10 +23,9 @@ type Genome struct {
 }
 
 // NewGenome creates a new genome.
-func NewGenome(cmds []Command, scoreFunc func(ga *Genome) float64) *Genome {
+func NewGenome(cmds []Command) *Genome {
 	g := new(Genome)
 	g.Gene = cmds
-	g.scoreFunc = scoreFunc
 	return g
 }
 
@@ -60,11 +59,10 @@ func (g *Genome) Switch(x, y int) {
 
 func (g *Genome) Randomize() {
 	l := len(g.Gene)
-	for i := 0; i < l; i++ {
-		var cmd Command
-		cmd.image = rand.Intn(100)
-		cmd.x = rand.Float32()*200.0 - 100.0
-		cmd.y = rand.Float32()*200.0 - 100.0
+	for idx := 0; idx < l; idx++ {
+		g.Gene[idx].image = 77
+		g.Gene[idx].x = rand.Float32()*200.0 - 100.0
+		g.Gene[idx].y = rand.Float32()*200.0 - 100.0
 	}
 	g.Reset()
 }
@@ -73,7 +71,6 @@ func (g *Genome) Copy() ga.GAGenome {
 	n := new(Genome)
 	n.Gene = make([]Command, len(g.Gene))
 	copy(n.Gene, g.Gene)
-	n.scoreFunc = g.scoreFunc
 	n.score = g.score
 	n.hasscore = g.hasscore
 	return n
@@ -85,7 +82,7 @@ func (g *Genome) Len() int {
 
 func (g *Genome) Score() float64 {
 	if !g.hasscore {
-		g.score = g.scoreFunc(g)
+		g.score = rand.Float64()
 		g.hasscore = true
 	}
 	return g.score
