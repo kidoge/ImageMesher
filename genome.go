@@ -60,7 +60,7 @@ func (g *Genome) Switch(x, y int) {
 func (g *Genome) Randomize() {
 	l := len(g.Gene)
 	for idx := 0; idx < l; idx++ {
-		g.Gene[idx].image = 77
+		g.Gene[idx].image = rand.Intn(len(problem.SourceImages))
 		g.Gene[idx].x = rand.Float32()*200.0 - 100.0
 		g.Gene[idx].y = rand.Float32()*200.0 - 100.0
 	}

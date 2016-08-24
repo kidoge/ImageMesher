@@ -7,10 +7,18 @@ import (
 	//"github.com/ojrac/opensimplex-go"
 )
 
+const imageDir = "~\\testimages"
+const targetFile = "~\\target.png"
+
 var scores int
+
+var problem *Problem
 
 func main() {
 	fmt.Println("Start")
+
+	prob = NewProblem(imageDir, targetFile)
+	prob.Load()
 
 	param := ga.GAParameter{
 		Initializer: new(ga.GARandomInitializer),

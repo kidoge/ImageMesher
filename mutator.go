@@ -21,7 +21,9 @@ type Mutator struct {
 func (m Mutator) Mutate(a ga.GAGenome) ga.GAGenome {
 	n := a.Copy().(*Genome)
 	idx := (rand.Intn(len(n.Gene)) / 5) * 5
-	n.Gene[idx].image = rand.Intn(100)
+	if rand.Float32() < 0.1 {
+		n.Gene[idx].image = rand.Intn(len(problem.SourceImages))
+	}
 	n.Gene[idx].x += float32(rand.NormFloat64() * m.posStddev)
 	n.Gene[idx].y += float32(rand.NormFloat64() * m.posStddev)
 	n.Reset()
