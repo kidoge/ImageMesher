@@ -17,8 +17,8 @@ var problem *Problem
 func main() {
 	fmt.Println("Start")
 
-	prob = NewProblem(imageDir, targetFile)
-	prob.Load()
+	problem = NewProblem(imageDir, targetFile)
+	problem.Load()
 
 	param := ga.GAParameter{
 		Initializer: new(ga.GARandomInitializer),
