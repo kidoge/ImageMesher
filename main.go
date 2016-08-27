@@ -23,10 +23,13 @@ func main() {
 	param := ga.GAParameter{
 		Initializer: new(ga.GARandomInitializer),
 		Selector:    ga.NewGATournamentSelector(0.7, 5),
-		Breeder:     new(ga.GA2PointBreeder),
-		Mutator:     new(Mutator),
-		PMutate:     0.1,
-		PBreed:      0.7,
+		Breeder:     new(Breeder),
+		Mutator: &Mutator{
+			PLengthChange: 1.0,
+			PosStdev:      0.1,
+		},
+		PMutate: 0.1,
+		PBreed:  0.7,
 	}
 
 	gao := ga.NewGA(param)
@@ -38,9 +41,7 @@ func main() {
 	}})
 
 	gao.Init(100, genome)
-	gao.OptimizeUntil(func(best ga.GAGenome) bool {
-		return best.Score() < 0.1
-	})
+	gao.Optimize(100)
 	gao.PrintTop(10)
 
 	fmt.Printf("Best: %f\n", gao.Best().Score())

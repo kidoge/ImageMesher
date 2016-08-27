@@ -14,6 +14,16 @@ type Command struct {
 	y     float32
 }
 
+func (cmd *Command) Randomize() {
+	cmd.image = rand.Intn(len(problem.SourceImages))
+	cmd.x = rand.Float32()
+	cmd.y = rand.Float32()
+}
+
+func (cmd *Command) String() string {
+	return fmt.Sprintf("{%d, %f, %f}", cmd.image, cmd.x, cmd.y)
+}
+
 // Genome struct contains the genetic information for generating a blended image
 type Genome struct {
 	Gene      []Command
@@ -60,9 +70,7 @@ func (g *Genome) Switch(x, y int) {
 func (g *Genome) Randomize() {
 	l := len(g.Gene)
 	for idx := 0; idx < l; idx++ {
-		g.Gene[idx].image = rand.Intn(len(problem.SourceImages))
-		g.Gene[idx].x = rand.Float32()*200.0 - 100.0
-		g.Gene[idx].y = rand.Float32()*200.0 - 100.0
+		g.Gene[idx].Randomize()
 	}
 	g.Reset()
 }
@@ -94,8 +102,4 @@ func (g *Genome) Reset() {
 
 func (g *Genome) String() string {
 	return fmt.Sprintf("%v", g.Gene)
-}
-
-func (cmd *Command) String() string {
-	return fmt.Sprintf("{%d, %f, %f}", cmd.image, cmd.x, cmd.y)
 }
