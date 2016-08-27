@@ -19,7 +19,9 @@ import (
 
 const imageDir = "~\\testimages"
 const targetFile = "~\\target.png"
+
 const dumpIncrement = 5
+const genGoal = 5
 
 var scores int
 
@@ -80,19 +82,26 @@ func main() {
 
 	gao := ga.NewGA(param)
 
-	genome := NewGenome([]Command{{
-		image: 0,
-		x:     0,
-		y:     0,
-	}})
+	var cmds []Command
+	for idx := 0; idx < 20; idx++ {
+		cmds = append(cmds, Command{
+			image: idx,
+			x:     0,
+			y:     0,
+		})
+	}
+	genome := NewGenome(cmds)
 
 	gao.Init(20, genome)
-	for gen := 0; gen < 100; gen += dumpIncrement {
+	startTime := time.Now().UnixNano()
+	for gen := 0; gen < genGoal; gen += dumpIncrement {
 		gao.Optimize(dumpIncrement)
 		gao.PrintTop(10)
 		saveImage(fmt.Sprintf("~/output/g%06d.png", gen), gao.Best().(*Genome).image)
 	}
-
+	endTime := time.Now().UnixNano()
+	elapsed := float64(endTime-startTime) / float64(time.Second)
 	fmt.Printf("Best: %f\n", gao.Best().Score())
+	fmt.Printf("Elapsed : %fs (avg: %fs/gen)\n", elapsed, elapsed/genGoal)
 
 }
