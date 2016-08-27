@@ -15,8 +15,6 @@ var scores int
 var problem *Problem
 
 func main() {
-	fmt.Println("Start")
-
 	problem = NewProblem(imageDir, targetFile)
 	problem.Load()
 
