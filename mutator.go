@@ -13,18 +13,22 @@ import (
 // - Add an image
 // - Remove an image
 type Mutator struct {
-	PLengthChange float32
-	PosStdev      float32
+	PImageChange  float64
+	PLengthChange float64
+	PosStdev      float64
+	NoiseStdev    float64
 }
 
 // alter modifies an existing
 func (m Mutator) alter(genome *Genome) {
 	idx := rand.Intn(len(genome.Gene))
-	if rand.Float32() < 0.1 {
+	if rand.Float64() < m.PImageChange {
 		genome.Gene[idx].image = rand.Intn(len(problem.SourceImages))
 	}
-	genome.Gene[idx].x += float32(rand.NormFloat64()) * m.PosStdev
-	genome.Gene[idx].y += float32(rand.NormFloat64()) * m.PosStdev
+	genome.Gene[idx].x += int(rand.NormFloat64() * m.PosStdev)
+	genome.Gene[idx].y += int(rand.NormFloat64() * m.PosStdev)
+	genome.Gene[idx].noiseX += rand.NormFloat64() * m.NoiseStdev
+	genome.Gene[idx].noiseY += rand.NormFloat64() * m.NoiseStdev
 }
 
 func (m Mutator) addRandom(genome *Genome) {
@@ -47,7 +51,7 @@ func (m Mutator) removeRandom(genome *Genome) {
 func (m Mutator) Mutate(a ga.GAGenome) ga.GAGenome {
 	newGen := a.Copy().(*Genome)
 
-	if rand.Float32() < m.PLengthChange {
+	if rand.Float64() < m.PLengthChange {
 		if newGen.Len() == 1 || rand.Float32() < 0.5 {
 			m.addRandom(newGen)
 		} else {
