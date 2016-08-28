@@ -140,7 +140,7 @@ func applyCommand(img []byte, cmd *Command) {
 			//    -0.5 | 0
 			//     0.5 | 1
 			//       1 | 1
-			noise := problem.Noise.Eval2(float64(cmdX)/100+cmd.noiseX, float64(cmdY)/100+cmd.noiseY) + 0.5
+			noise := problem.Noise.Eval2(float64(cmdX)/50+cmd.noiseX, float64(cmdY)/50+cmd.noiseY) + 0.5
 			if noise < 0.0 {
 				noise = 0.0
 			} else if noise > 1.0 {
