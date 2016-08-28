@@ -21,8 +21,8 @@ import (
 const imageDir = "~\\testimages"
 const targetFile = "~\\target.png"
 
-const dumpIncrement = 5
-const genGoal = 5
+const dumpIncrement = 2
+const genGoal = 100
 
 var scores int
 
@@ -88,19 +88,18 @@ func main() {
 		Selector:    ga.NewGATournamentSelector(0.7, 5),
 		Breeder:     new(Breeder),
 		Mutator: &Mutator{
-			PImageChange:  0.01,
-			PLengthChange: 0.5,
-			PosStdev:      20.0,
+			PLengthChange: 0.1,
+			PosStdev:      100.0,
 			NoiseStdev:    20.0,
 		},
-		PMutate: 0.2,
-		PBreed:  0.8,
+		PMutate: 0.3,
+		PBreed:  0.7,
 	}
 
 	gao := ga.NewGA(param)
 
 	var cmds []Command
-	for idx := 0; idx < 20; idx++ {
+	for idx := 0; idx < 40; idx++ {
 		cmds = append(cmds, Command{
 			image: idx,
 			x:     0,

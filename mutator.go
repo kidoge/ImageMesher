@@ -13,7 +13,6 @@ import (
 // - Add an image
 // - Remove an image
 type Mutator struct {
-	PImageChange  float64
 	PLengthChange float64
 	PosStdev      float64
 	NoiseStdev    float64
@@ -22,11 +21,23 @@ type Mutator struct {
 // alter modifies an existing
 func (m Mutator) alter(genome *Genome) {
 	idx := rand.Intn(len(genome.Gene))
-	if rand.Float64() < m.PImageChange {
-		genome.Gene[idx].image = rand.Intn(len(problem.SourceBytes))
+	w := problem.SourceWidths[genome.Gene[idx].image]
+	h := problem.SourceHeights[genome.Gene[idx].image]
+
+	nx := genome.Gene[idx].x + int(rand.NormFloat64()*m.PosStdev)
+	for !(nx > -w &&
+		nx < problem.TargetWidth) {
+		nx = genome.Gene[idx].x + int(rand.NormFloat64()*m.PosStdev)
 	}
-	genome.Gene[idx].x += int(rand.NormFloat64() * m.PosStdev)
-	genome.Gene[idx].y += int(rand.NormFloat64() * m.PosStdev)
+	genome.Gene[idx].x = nx
+
+	ny := genome.Gene[idx].y + int(rand.NormFloat64()*m.PosStdev)
+	for !(ny > -h &&
+		ny < problem.TargetHeight) {
+		ny = genome.Gene[idx].y + int(rand.NormFloat64()*m.PosStdev)
+	}
+	genome.Gene[idx].y = ny
+
 	genome.Gene[idx].noiseX += rand.NormFloat64() * m.NoiseStdev
 	genome.Gene[idx].noiseY += rand.NormFloat64() * m.NoiseStdev
 }
