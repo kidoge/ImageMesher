@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/thoj/go-galib"
-	//"github.com/ojrac/opensimplex-go"
 )
 
 const imageDir = "~\\testimages"
