@@ -155,6 +155,14 @@ func applyCommand(img []byte, cmd *Command) {
 		}
 	}
 }
+func (g *Genome) OverlayCmds() []byte {
+	newImg := make([]byte, len(problem.TargetBytes))
+	copy(newImg, problem.TargetBytes)
+	for _, cmd := range g.Gene {
+		applyCommand(newImg, &cmd)
+	}
+	return newImg
+}
 
 func (g *Genome) calcScore() float64 {
 	bg := []byte{255}

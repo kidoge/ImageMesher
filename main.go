@@ -114,7 +114,7 @@ func main() {
 	for gen := 0; gen < genGoal; gen += dumpIncrement {
 		gao.Optimize(dumpIncrement)
 		gao.PrintTop(10)
-		saveImage(fmt.Sprintf("~/output/g%06d.png", gen), gao.Best().(*Genome).img)
+		saveImage(fmt.Sprintf("~/output/g%06d.png", gen), gao.Best().(*Genome).OverlayCmds())
 	}
 	endTime := time.Now().UnixNano()
 	elapsed := float64(endTime-startTime) / float64(time.Second)
