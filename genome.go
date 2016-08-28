@@ -136,7 +136,8 @@ func applyCommand(img []byte, cmd *Command) {
 }
 
 func (g *Genome) calcScore() float64 {
-	g.img = make([]byte, problem.TargetWidth*problem.TargetHeight*4)
+	bg := []byte{255}
+	g.img = bytes.Repeat(bg, problem.TargetWidth*problem.TargetHeight*4)
 	for _, cmd := range g.Gene {
 		applyCommand(g.img, &cmd)
 	}
