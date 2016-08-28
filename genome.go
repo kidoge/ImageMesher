@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
-	"image"
-	"image/color"
 	"math"
 	"math/rand"
 
 	"github.com/thoj/go-galib"
 )
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 func minInt(a, b int) int {
 	if a < b {
@@ -27,9 +32,9 @@ type Command struct {
 }
 
 func (cmd *Command) Randomize() {
-	cmd.image = rand.Intn(len(problem.SourceImages))
-	cmd.x = rand.Intn(problem.TargetImage.Bounds().Dx())
-	cmd.y = rand.Intn(problem.TargetImage.Bounds().Dy())
+	cmd.image = rand.Intn(len(problem.SourceBytes))
+	cmd.x = rand.Intn(problem.TargetWidth)
+	cmd.y = rand.Intn(problem.TargetHeight)
 	cmd.noiseX = rand.Float64()
 	cmd.noiseY = rand.Float64()
 }
@@ -44,7 +49,7 @@ type Genome struct {
 	score     float64
 	scoreFunc func(ga *Genome) float64
 	hasscore  bool
-	image     *image.RGBA
+	img       []byte
 }
 
 // NewGenome creates a new genome.
@@ -103,50 +108,42 @@ func (g *Genome) Len() int {
 	return len(g.Gene)
 }
 
-func linearCombine(alpha float64, cImg, cOver color.Color) color.RGBA {
-	r1, g1, b1, _ := cImg.RGBA()
-	r2, g2, b2, _ := cOver.RGBA()
-	return color.RGBA{R: uint8(float64(r2)*alpha + float64(r1)*(1.0-alpha)),
-		G: uint8(float64(g2)*alpha + float64(g1)*(1.0-alpha)),
-		B: uint8(float64(b2)*alpha + float64(b1)*(1.0-alpha)),
-		A: 255}
+func linearCombine(alpha float64, bBack, bOver byte) byte {
+	return byte(float64(bOver)*alpha + float64(bBack)*(1.0-alpha))
 }
 
-func applyCommand(img *image.RGBA, cmd *Command) {
-	imgBounds := img.Bounds()
-	subBounds := problem.SourceImages[cmd.image].Bounds()
-	subX := 0
-	maxX := minInt(int(cmd.x)+subBounds.Dx(), imgBounds.Max.X)
-	maxY := minInt(int(cmd.y)+subBounds.Dy(), imgBounds.Max.Y)
-	for imgX := cmd.x; imgX < maxX; imgX++ {
-		subY := 0
-		for imgY := cmd.y; imgY < maxY; imgY++ {
+func applyCommand(img []byte, cmd *Command) {
+	minImgX := maxInt(0, cmd.x)
+	minImgY := maxInt(0, cmd.y)
+	maxImgX := minInt(cmd.x+problem.SourceWidths[cmd.image], problem.TargetWidth)
+	maxImgY := minInt(cmd.y+problem.SourceHeights[cmd.image], problem.TargetHeight)
+	minCmdX := maxInt(0, -cmd.x)
+	minCmdY := maxInt(0, -cmd.y)
+	for cmdY, imgY := minCmdY, minImgY; imgY < maxImgY; cmdY, imgY = cmdY+1, imgY+1 {
+		cmdIdx := (cmdY*problem.SourceWidths[cmd.image] + minCmdX) * 4
+		imgIdx := (imgY*problem.TargetWidth + minImgX) * 4
+		for imgX := minImgX; imgX < maxImgX; imgX++ {
 			//noise := problem.Noise.Eval2(float64(subX)/100+cmd.noiseX, float64(subY)/100+cmd.noiseY)
 			noise := 1.0
-			imgColor := img.RGBAAt(imgX, imgY)
-			subColor := problem.SourceImages[cmd.image].At(subX, subY)
-			img.SetRGBA(imgX, imgY, linearCombine(noise, imgColor, subColor))
-			subY++
+
+			for c := 0; c < 4; c++ {
+				img[imgIdx+c] = linearCombine(noise, img[imgIdx+c], problem.SourceBytes[cmd.image][cmdIdx+c])
+			}
+			imgIdx += 4
+			cmdIdx += 4
 		}
-		subX++
 	}
 }
+
 func (g *Genome) calcScore() float64 {
-	bounds := problem.TargetImage.Bounds()
-	g.image = image.NewRGBA(bounds)
+	g.img = make([]byte, problem.TargetWidth*problem.TargetHeight*4)
 	for _, cmd := range g.Gene {
-		applyCommand(g.image, &cmd)
+		applyCommand(g.img, &cmd)
 	}
 
 	var score float64
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			rs, gs, bs, _ := problem.TargetImage.At(x, y).RGBA()
-			ri, gi, bi, _ := g.image.At(x, y).RGBA()
-			score += math.Abs(float64(rs-ri)) +
-				math.Abs(float64(gs-gi)) +
-				math.Abs(float64(bs-bi))
-		}
+	for b := 0; b < problem.TargetWidth*problem.TargetHeight*4; b++ {
+		score += math.Abs(float64(problem.TargetBytes[b] - g.img[b]))
 	}
 	return score
 }

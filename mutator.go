@@ -23,7 +23,7 @@ type Mutator struct {
 func (m Mutator) alter(genome *Genome) {
 	idx := rand.Intn(len(genome.Gene))
 	if rand.Float64() < m.PImageChange {
-		genome.Gene[idx].image = rand.Intn(len(problem.SourceImages))
+		genome.Gene[idx].image = rand.Intn(len(problem.SourceBytes))
 	}
 	genome.Gene[idx].x += int(rand.NormFloat64() * m.PosStdev)
 	genome.Gene[idx].y += int(rand.NormFloat64() * m.PosStdev)

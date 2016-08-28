@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/color"
 	"image/png"
 	"log"
 	"math/rand"
@@ -35,13 +36,29 @@ func Homedir() string {
 	return usr.HomeDir
 }
 
-func saveImage(outputPath string, img image.Image) {
+func bitmapToImage(bitmap []byte, width, height int) image.Image {
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	var idx int
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			img.SetRGBA(x, y, color.RGBA{
+				R: bitmap[idx],
+				G: bitmap[idx+1],
+				B: bitmap[idx+2],
+				A: bitmap[idx+3]})
+			idx += 4
+		}
+	}
+	return img
+}
+
+func saveImage(outputPath string, img []byte) {
 	absoluteOutFile := strings.Replace(outputPath, "~", Homedir(), 1)
 	f, err := os.OpenFile(absoluteOutFile, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		panic(err)
 	}
-	err = png.Encode(f, img)
+	err = png.Encode(f, bitmapToImage(img, problem.TargetWidth, problem.TargetHeight))
 	if err != nil {
 		panic(err)
 	}
@@ -97,7 +114,7 @@ func main() {
 	for gen := 0; gen < genGoal; gen += dumpIncrement {
 		gao.Optimize(dumpIncrement)
 		gao.PrintTop(10)
-		saveImage(fmt.Sprintf("~/output/g%06d.png", gen), gao.Best().(*Genome).image)
+		saveImage(fmt.Sprintf("~/output/g%06d.png", gen), gao.Best().(*Genome).img)
 	}
 	endTime := time.Now().UnixNano()
 	elapsed := float64(endTime-startTime) / float64(time.Second)
