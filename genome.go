@@ -1,12 +1,23 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/rand"
 
 	"github.com/thoj/go-galib"
 )
+
+const idealCmdCount = 40
+
+// Missing int math functions from go lib
+func absInt(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
 
 func maxInt(a, b int) int {
 	if a > b {
@@ -122,9 +133,19 @@ func applyCommand(img []byte, cmd *Command) {
 	for cmdY, imgY := minCmdY, minImgY; imgY < maxImgY; cmdY, imgY = cmdY+1, imgY+1 {
 		cmdIdx := (cmdY*problem.SourceWidths[cmd.image] + minCmdX) * 4
 		imgIdx := (imgY*problem.TargetWidth + minImgX) * 4
-		for imgX := minImgX; imgX < maxImgX; imgX++ {
-			//noise := problem.Noise.Eval2(float64(subX)/100+cmd.noiseX, float64(subY)/100+cmd.noiseY)
-			noise := 1.0
+		for cmdX, imgX := minCmdX, minImgX; imgX < maxImgX; cmdX, imgX = cmdX+1, imgX+1 {
+			// Normalized as following
+			// Simplex | Normalized
+			//      -1 | 0
+			//    -0.5 | 0
+			//     0.5 | 1
+			//       1 | 1
+			noise := problem.Noise.Eval2(float64(cmdX)/100+cmd.noiseX, float64(cmdY)/100+cmd.noiseY) + 0.5
+			if noise < 0.0 {
+				noise = 0.0
+			} else if noise > 1.0 {
+				noise = 1.0
+			}
 
 			for c := 0; c < 4; c++ {
 				img[imgIdx+c] = linearCombine(noise, img[imgIdx+c], problem.SourceBytes[cmd.image][cmdIdx+c])
@@ -146,7 +167,7 @@ func (g *Genome) calcScore() float64 {
 	for b := 0; b < problem.TargetWidth*problem.TargetHeight*4; b++ {
 		score += math.Abs(float64(problem.TargetBytes[b] - g.img[b]))
 	}
-	return score
+	return score * float64(100+absInt(g.Len()-idealCmdCount))
 }
 
 func (g *Genome) Score() float64 {
